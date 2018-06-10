@@ -2,42 +2,32 @@
 
 const net = require('net')
 
-const client = new net.Socket()
+module.exports = class Client {
+  constructor (host, port) {
+    this._client = new net.Socket()
+    this._host = host
+    this._port = port
+  }
 
-client.on('data', (data) => {
-  console.log(`Received: ${data}`)
-  
-	client.destroy() // kill client after server's response
-})
+  close (data, encoding) {
+    this._client.end(data, encoding)
+  }
 
-client.on('close', () => {
-	console.log('Connection closed')
-})
+  connect () {
+    return new Promise((resolve, reject) => {
+      this._client.connect(this._port, this._host, () => {
+        console.log('Connected to Server')
 
-const connect = (host, port) => {
-  return new Promise((resolve, reject) => {
-    client.connect(port, host, () => {
-      console.log('Connected to Server')
-  
-      resolve()
+        resolve()
+      })
     })
-  })
-}
+  }
 
-const close = (data, encoding) => {
-  client.end(data, encoding)
-}
-
-const send = (data, encoding = undefined) => {
-  return new Promise((resolve, reject) => {
-    client.write(data, encoding, () => {
-      resolve()
+  send (data, encoding = undefined) {
+    return new Promise((resolve, reject) => {
+      this._client.write(data, encoding, () => {
+        resolve()
+      })
     })
-  })
-}
-
-module.exports = {
-  close,
-  connect,
-  send,
+  }
 }
