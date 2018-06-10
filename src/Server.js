@@ -2,15 +2,17 @@
 
 const net = require('net')
 
-const { getConfig } = require('./Utils')
+// const { getConfig } = require('./Utils')
+const config = require('./../kiirus-db-config.json')
+const System = require('./System')
 
-const config = getConfig()
+// const config = getConfig()
 const server = net.createServer()
 
 const executeCommand = (data) => {
   try {
     const command = JSON.parse(data)
-    
+
     console.log(`data: ${JSON.stringify(command)}`)
   } catch(error) {
     throw error;
@@ -46,8 +48,10 @@ const handleConnection = (connection) => {
 }
 
 const start = () => {
-  server.listen(config.port, () => {
-    console.log('server listening to %j', server.address())
+  System.init(config).then(() => {
+    server.listen(config.port, () => {
+      console.log('server listening to %j', server.address())
+    })
   })
 }
 
