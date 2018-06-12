@@ -3,6 +3,9 @@
 const crypto = require('crypto')
 const path = require('path')
 
+const glob = require('glob')
+
+const QueryParser = require('./QueryParser')
 const Storage = require('./../Storage')
 
 module.exports = class Collection {
@@ -14,13 +17,59 @@ module.exports = class Collection {
    */
   constructor (config, database, name) {
     this.config = config
-
     this.database = database
-
+    this.queryParser = new QueryParser()
     this.name = name
   }
 
+  /**
+   * Select a fields set using a query expression
+   *
+   * @param {function|object} query
+   * @return {Promise<array>}
+   */
+  async find (query) {
+    return this.getRecords(this.queryParser.build(query))
+      .then((records) => {
+        return records.filter(this.queryParser.build(query))
+      }).catch((error) => {
+        return error
+      })
+  }
+
     /**
+   * Read a set of files from the collection path
+   *
+   * @param {object} query
+   * @returns {Promise<array>}
+   */
+  async getRecords (query) {
+    return new Promise((resolve, reject) => {
+      const pathname = path.join(this._getPath(), '*.json')
+
+      glob(pathname, (error, files) => {
+        if (error) {
+          reject(error)
+        }
+
+        const promises = []
+
+        files.forEach((file) => {
+          promises.push(Storage.readFile(file))
+        })
+
+        Promise.all(promises).then((records) => {
+          try {
+            resolve(records.map((record) => JSON.parse(this._decipher(record))))
+          } catch (error) {
+            reject(`Access denied for user '${this.config.username}:${this.config.password}'`)
+          }
+        })
+      })
+    })
+  }
+
+  /**
    * Insert a data set into the collection
    *
    * @param {array} data
@@ -42,7 +91,7 @@ module.exports = class Collection {
     }
   }
 
-    /**
+  /**
    * Write a ate set to a given collection and return the records ids
    *
    * @param {string} collection

@@ -32,12 +32,22 @@ module.exports = class Client {
 
     const result = new Promise((resolve, reject) => {
       try {
-        this.client = http.request(options, (request) => {
-          if (request.statusCode >= 200 && request.statusCode < 300) {
-            resolve(request.statusCode)
-          }
-  
-          reject(request.statusCode)
+        this.client = http.request(options, (response) => {
+          let body = []
+
+          response.on('data', function (chunk) {
+            body.push(chunk)
+          })
+
+          response.on('end', function () {
+            body = JSON.parse(Buffer.concat(body).toString())
+
+            if (response.statusCode >= 200 && response.statusCode < 300) {
+              resolve(body)
+            }
+
+            reject(response.statusCode)
+          })
         })
       } catch (e) {
         reject(e.message)

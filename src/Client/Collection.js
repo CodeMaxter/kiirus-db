@@ -9,7 +9,27 @@ module.exports = class Collection {
     this.name = name
   }
 
-    /**
+  /**
+   * Select a fields set using a query expression
+   *
+   * @param {function|object} query
+   * @return {Promise<array>}
+   */
+  async find (query) {
+    const command = Helper.createCommand(
+      this.constructor.name,
+      'find',
+      {
+        database: this.database,
+        collection: this.name,
+        data: query
+      }
+    )
+
+    return this.client.send(command)
+  }
+
+  /**
    * Insert a data set into the collection
    *
    * @param {array} data
@@ -22,7 +42,7 @@ module.exports = class Collection {
       {
         database: this.database,
         collection: this.name,
-        records: data
+        data
       }
     )
 

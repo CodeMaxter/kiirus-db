@@ -12,6 +12,7 @@ server.post('/', (request, response) => {
   switch (type) {
     case 'collection':
       database.use(options.database)
+
       database.getCollection(options.collection)[operation](options.data)
         .then((result) => {
           server.write(response, JSON.stringify(result))

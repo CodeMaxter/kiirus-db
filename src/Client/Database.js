@@ -11,6 +11,12 @@ module.exports = class Database {
     return SimpleTarget(this, 'getCollection')
   }
 
+  /**
+   * Return a COllection object, configurated for the given collection
+   *
+   * @param {string} collection
+   * @returns {Collection}
+   */
   getCollection (collection) {
     return new Collection(this.name, collection, this.client)
   }

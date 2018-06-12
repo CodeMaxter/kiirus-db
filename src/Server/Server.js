@@ -15,6 +15,10 @@ module.exports = class Server {
     this.server = http.createServer(this.requestHandler)
   }
 
+  get (path, handler) {
+    this.routes['GET'] = {[path]: handler}
+  }
+
   post (path, handler) {
     this.routes['POST'] = {[path]: handler}
   }
