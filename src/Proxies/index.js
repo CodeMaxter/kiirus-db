@@ -1,5 +1,6 @@
 'use strict'
 
 module.exports = {
-  SimpleTarget: require('./SimpleTarget')
+  CollectionProxy: require('./CollectionProxy'),
+  SimpleTarget: require('./SimpleTarget'),
 }

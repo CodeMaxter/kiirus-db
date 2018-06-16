@@ -13,10 +13,17 @@ server.post('/', (request, response) => {
     case 'collection':
       database.use(options.database)
 
-      database.getCollection(options.collection)[operation](options.data)
-        .then((result) => {
-          server.write(response, JSON.stringify(result))
-        })
+      try {
+        database.getCollection(options.collection)[operation](options.data)
+          .then((result) => {
+            server.write(response, JSON.stringify(result))
+          }).catch((error) => {
+            console.log(error)
+          })
+      } catch (e) {
+        // TODO Manage the error in a proper way
+        server.write(response, JSON.stringify({message: 'Unexpected error.'}))
+      }
 
       break
   }
