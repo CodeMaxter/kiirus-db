@@ -4,11 +4,12 @@
   "description": "A NoSQL document oriented database, writed entirely in JavaScript.",
   "main": "index.js",
   "scripts": {
-    "test": "ava --verbose",
-    "test:watch": "ava --verbose --watch",
     "ava": "ava --verbose",
     "coverage": "nyc ava",
-    "report": "nyc report --reporter=html"
+    "report": "nyc report --reporter=html",
+    "test": "ava --verbose",
+    "test:watch": "ava --verbose --watch",
+    "start": "node server.js"
   },
   "ava": {
     "files": [
