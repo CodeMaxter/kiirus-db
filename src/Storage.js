@@ -75,6 +75,12 @@ module.exports = class Storage {
     })
   }
 
+  /**
+   * 
+   * @param {string} pathname 
+   * @param {boolean} sync 
+   * @returns {Promise<array>}
+   */
   static readFile (pathname, sync = false) {
     if (sync) {
       return fs.readFileSync(pathname, 'utf8')
