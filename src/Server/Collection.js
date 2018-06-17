@@ -30,7 +30,7 @@ module.exports = class Collection {
    *
    * @return Promise<boolean>
    */
-  async delete (query) {
+  delete (query) {
     return this.find(query).then((records) => {
       const collectionPath = this._getPath()
 
@@ -55,11 +55,9 @@ module.exports = class Collection {
    * @param {function|object} query
    * @return {Promise<array>}
    */
-  async find (query) {
+  find (query) {
     return this.getRecords(this.queryParser.build(query))
-      .then((records) => {
-        return records.filter(this.queryParser.build(query))
-      }).catch((error) => {
+      .catch((error) => {
         return error
       })
   }
@@ -70,29 +68,31 @@ module.exports = class Collection {
    * @param {object} query
    * @returns {Promise<array>}
    */
-  async getRecords (query) {
+  getRecords (query) {
     return new Promise((resolve, reject) => {
       const pathname = path.join(this._getPath(), '*.json')
 
-      glob(pathname, (error, files) => {
-        if (error) {
-          reject(error)
-        }
-
-        const promises = []
-
-        files.forEach((file) => {
-          promises.push(Storage.readFile(file))
-        })
-
-        Promise.all(promises).then((records) => {
-          try {
-            resolve(records.map((record) => JSON.parse(this._decipher(record))))
-          } catch (error) {
-            reject(`Access denied for user '${this.config.username}:${this.config.password}'`)
+      try {
+        glob(pathname, async (error, files) => {
+          if (error) {
+            reject(error)
           }
+
+          const records = []
+
+          for (const file of files) {
+            const record = await Storage.readJson(file)
+
+            if (query(record) === true) {
+              records.push(record)
+            }
+          }
+
+          resolve(records)
         })
-      })
+      } catch (error) {
+        reject(`Access denied for user '${this.config.username}:${this.config.password}'`)
+      }
     })
   }
 
@@ -127,7 +127,7 @@ module.exports = class Collection {
    *
    * @return {Promise<array>}
    */
-  async update ({query, update}) {
+  update ({query, update}) {
     return this.find(query).then((records) => {
       return records.map((record) => {
         for (const [key, value] of Object.entries(update)) {
@@ -154,7 +154,7 @@ module.exports = class Collection {
    *
    * @return {Promise<array>}
    */
-  async write (collection, data) {
+  write (collection, data) {
     const promises = []
 
     for (const record of data) {
